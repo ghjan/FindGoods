@@ -1,4 +1,4 @@
-# -*- coding: gb2312 -*-
+# -*- coding: utf-8 -*-
 
 '''
 Created on 2016-12-15
@@ -23,25 +23,25 @@ class FindGoods(Spider):
     ]
 
     def parse(self, response):
-        # ·´¸´È·ÈÏÊÇ·ñËÑË÷³É¹¦
+        # åå¤ç¡®è®¤æ˜¯å¦æœç´¢æˆåŠŸ
         if response.url == "https://www.tmall.com/":
-            # ¶ÁÈ¡ÁÙÊ±ÎÄ¼ş
+            # è¯»å–ä¸´æ—¶æ–‡ä»¶
             temp = open('tempgoods.temp', 'r')
             good = temp.read()
             temp.close()
-            # ÌìÃ¨ËÑË÷¸ÃÉÌÆ·µÚÒ»Ò³
+            # å¤©çŒ«æœç´¢è¯¥å•†å“ç¬¬ä¸€é¡µ
             url = "https://list.tmall.com/search_product.htm?q=" + good + "&type=p&vmarket=&spm=875.7931836%2FA.a2227oh.d100&from=mallfp..pc_1_searchbutton"
-            # µİ¹é
+            # é€’å½’
             yield Request(url, callback=self.parse)
 
         else:
-            # ËÑË÷³É¹¦
+            # æœç´¢æˆåŠŸ
             item = FindgoodsItem()
             sel = Selector(response)
             gifts = sel.xpath('//*[@id="J_ItemList"]/div[@class="product  "]')
             for gift in gifts:
                 name = gift.xpath('div/p[@class="productTitle"]/a/@title').extract()
-                # ÌìÃ¨µçÆ÷³ÇHTML½á¹¹²»Í¬
+                # å¤©çŒ«ç”µå™¨åŸHTMLç»“æ„ä¸åŒ
                 if not name:
                     name = gift.xpath('div/div[@class="productTitle productTitle-spu"]/a[1]/text()').extract()
 
@@ -53,64 +53,64 @@ class FindGoods(Spider):
                 if not url:
                     url = gift.xpath('div/div[@class="productTitle productTitle-spu"]/a[1]/@href').extract()
 
-                # sys.getfilesystemencoding()»ñµÃ±¾µØ±àÂë£¨mbcs±àÂë£©
+                # sys.getfilesystemencoding()è·å¾—æœ¬åœ°ç¼–ç ï¼ˆmbcsç¼–ç ï¼‰
                 item['name'] = [na.encode(sys.getfilesystemencoding()) for na in name]
 
-                # È¥µôÉÌµêÃûÄ©Î²µÄ\n»»ĞĞ·û£¨ÓĞÁ½¸ö\n£©
+                # å»æ‰å•†åº—åæœ«å°¾çš„\næ¢è¡Œç¬¦ï¼ˆæœ‰ä¸¤ä¸ª\nï¼‰
                 tempshop = str(shop[0].encode(sys.getfilesystemencoding()))
                 item['shop'] = tempshop.strip('\n')
 
                 item['price'] = price
                 item['url'] = 'https:' + url[0]
 
-                # ÌìÃ¨µçÆ÷³ÇÉÙÊıÉÌÆ·ÎŞ½»Ò×Á¿ĞÅÏ¢
+                # å¤©çŒ«ç”µå™¨åŸå°‘æ•°å•†å“æ— äº¤æ˜“é‡ä¿¡æ¯
                 tradnum = 0
                 if trading:
-                    # ÔÚËÑË÷Ò³ÎŞ·¨»ñÈ¡½»Ò×Á¿ÏêÏ¸Êı×Ö£¬Ğè×ª»¯
+                    # åœ¨æœç´¢é¡µæ— æ³•è·å–äº¤æ˜“é‡è¯¦ç»†æ•°å­—ï¼Œéœ€è½¬åŒ–
                     tradstr = str(trading[0].encode(sys.getfilesystemencoding()))
                     item['trading'] = tradstr
-                    # ¡°±Ê¡±×ÖÔÚ×Ö·û´®ÖĞµÄÏÂ±ê
+                    # â€œç¬”â€å­—åœ¨å­—ç¬¦ä¸²ä¸­çš„ä¸‹æ ‡
                     biindex = tradstr.index('\xb1\xca')
-                    # ³ıÈ¥¡°±Ê¡±
+                    # é™¤å»â€œç¬”â€
                     tradstr = tradstr[:biindex]
-                    # ÅĞ¶ÏÊÇ·ñÓĞ¡°Íò¡±×Ö
+                    # åˆ¤æ–­æ˜¯å¦æœ‰â€œä¸‡â€å­—
                     if '\xcd\xf2' in tradstr:
-                        # ¡°Íò¡±×ÖÔÚ×Ö·û´®ÖĞµÄÏÂ±ê
+                        # â€œä¸‡â€å­—åœ¨å­—ç¬¦ä¸²ä¸­çš„ä¸‹æ ‡
                         wanindex = tradstr.index('\xcd\xf2')
-                        # ³ıÈ¥¡°Íò¡±×Ö
+                        # é™¤å»â€œä¸‡â€å­—
                         tradstr = tradstr[:wanindex]
                         tradnum = tradnum + string.atof(tradstr) * 10000
                     else:
-                        # Ã»ÓĞ¡°Íò¡±×Ö
+                        # æ²¡æœ‰â€œä¸‡â€å­—
                         tradnum = tradnum + string.atof(tradstr)
 
-                # ÌìÃ¨µçÆ÷³ÇÎŞÆÀÂÛÊıĞÅÏ¢
+                # å¤©çŒ«ç”µå™¨åŸæ— è¯„è®ºæ•°ä¿¡æ¯
                 revinum = 0
                 if review:
-                    # ÔÚËÑË÷Ò³ÎŞ·¨»ñÈ¡ÆÀÂÛÊıÏêÏ¸Êı×Ö£¬Ğè×ª»¯
+                    # åœ¨æœç´¢é¡µæ— æ³•è·å–è¯„è®ºæ•°è¯¦ç»†æ•°å­—ï¼Œéœ€è½¬åŒ–
                     revistr = str(review[0].encode(sys.getfilesystemencoding()))
                     item['review'] = revistr
-                    # ÅĞ¶ÏÊÇ·ñÓĞ¡°Íò¡±×Ö
+                    # åˆ¤æ–­æ˜¯å¦æœ‰â€œä¸‡â€å­—
                     if '\xcd\xf2' in revistr:
-                        # ¡°Íò¡±×ÖÔÚ×Ö·û´®ÖĞµÄÏÂ±ê
+                        # â€œä¸‡â€å­—åœ¨å­—ç¬¦ä¸²ä¸­çš„ä¸‹æ ‡
                         wanindex2 = revistr.index('\xcd\xf2')
-                        # ³ıÈ¥¡°Íò¡±×Ö
+                        # é™¤å»â€œä¸‡â€å­—
                         revistr = revistr[:wanindex2]
                         revinum = revinum + string.atof(revistr) * 10000
                     else:
-                        # Ã»ÓĞ¡°Íò¡±×Ö
+                        # æ²¡æœ‰â€œä¸‡â€å­—
                         revinum = revinum + string.atof(revistr)
 
-                # ¼ÆËãÆÀ·Ö
+                # è®¡ç®—è¯„åˆ†
                 score = revinum + (tradnum * 2)
                 item['score'] = round(score)
                 yield (item)
-            # ÌáÈ¡ÉÌÆ·Ãû
+            # æå–å•†å“å
             good = response.url[(response.url.index("q=") + 2):response.url.index("&type=p&v")]
             next_page_urls = [
                 "https://list.tmall.com/search_product.htm?spm=a220m.1000858.0.0.0HVJLN&s=60&q=" + good + "&sort=s&style=g&from=mallfp..pc_1_searchbutton&type=pc#J_Filter",
                 "https://list.tmall.com/search_product.htm?spm=a220m.1000858.0.0.Zt2HlG&s=120&q=" + good + "&sort=s&style=g&from=mallfp..pc_1_searchbutton&type=pc#J_Filter"
             ]
-            # µİ¹é»ñÈ¡ºóÁ½Ò³
+            # é€’å½’è·å–åä¸¤é¡µ
             for next_page_url in next_page_urls:
                 yield Request(next_page_url, callback=self.parse)
