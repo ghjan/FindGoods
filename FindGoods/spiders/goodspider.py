@@ -13,6 +13,7 @@ from scrapy.spider import Spider
 from scrapy.selector import Selector
 from FindGoods.items import FindgoodsItem
 
+
 class FindGoods(Spider):
     name = "FindGoods"
     download_delay = 4
@@ -103,7 +104,7 @@ class FindGoods(Spider):
                 # 计算评分
                 score = revinum + (tradnum * 2)
                 item['score'] = round(score)
-                yield(item)
+                yield (item)
             # 提取商品名
             good = response.url[(response.url.index("q=") + 2):response.url.index("&type=p&v")]
             next_page_urls = [
